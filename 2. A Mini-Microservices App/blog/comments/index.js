@@ -41,6 +41,14 @@ app.post("/posts/:id/comments", async (req, res) => {
   res.status(201).json(COMMENTS[id]);
 });
 
+app.post("/events", (req, res) => {
+  const { type } = req.body;
+
+  console.log(`Event received: ${type}`);
+
+  res.json({ status: "OK" });
+});
+
 app.listen(4001, () => {
   console.log("Listenin on 4001");
 });
