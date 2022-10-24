@@ -42,7 +42,7 @@ app.post("/posts/:id/comments", async (req, res) => {
   res.status(201).json(COMMENTS[id]);
 });
 
-app.post("/events", (req, res) => {
+app.post("/events", async (req, res) => {
   const { type, data } = req.body;
 
   console.log(`Event received: ${type}`);
@@ -58,7 +58,7 @@ app.post("/events", (req, res) => {
 
         comment.status = status;
 
-        axios.post("http://localhost:5000/events", {
+        await axios.post("http://localhost:5000/events", {
           type: "CommentUpdated",
           data: {
             ...comment,
