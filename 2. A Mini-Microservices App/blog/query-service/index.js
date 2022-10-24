@@ -45,11 +45,11 @@ app.post("/events", (req, res) => {
       break;
     }
     case "CommentCreated": {
-      const { id, content, postId } = data;
+      const { id, content, status, postId } = data;
 
       const post = POSTS[postId];
 
-      post.comments.push({ id, content });
+      post.comments.push({ id, content, status });
       break;
     }
     default:
