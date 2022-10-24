@@ -3,6 +3,7 @@ const { randomBytes } = require("crypto");
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const axios = require("axios");
 
 const COMMENTS = {};
 
@@ -17,7 +18,7 @@ app.get("/posts/:id/comments", (req, res) => {
   res.json(COMMENTS[id]);
 });
 
-app.post("/posts/:id/comments", (req, res) => {
+app.post("/posts/:id/comments", async (req, res) => {
   const { id } = req.params;
   const { content } = req.body;
   const commentId = randomBytes(4).toString("hex");
@@ -27,6 +28,15 @@ app.post("/posts/:id/comments", (req, res) => {
   comments.push({ id: commentId, content });
 
   COMMENTS[id] = comments;
+
+  await axios.post("http://localhost:5000/events", {
+    type: "CommentCreated",
+    data: {
+      id: commentId,
+      content,
+      postId: id,
+    },
+  });
 
   res.status(201).json(COMMENTS[id]);
 });
