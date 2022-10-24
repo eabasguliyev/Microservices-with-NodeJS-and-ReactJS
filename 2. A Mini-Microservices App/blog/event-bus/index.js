@@ -9,6 +9,8 @@ const SERVICES = {
   moderation: "http://localhost:4003/events",
 };
 
+const EVENTS = [];
+
 const app = express();
 
 app.use(bodyParser.json());
@@ -16,9 +18,21 @@ app.use(bodyParser.json());
 app.post("/events", (req, res) => {
   const event = req.body;
 
-  Object.values(SERVICES).map((serviceUrl) => axios.post(serviceUrl, event));
+  EVENTS.push(event);
+
+  Object.values(SERVICES).map(async (serviceUrl) => {
+    try {
+      await axios.post(serviceUrl, event);
+    } catch (error) {
+      console.log(error);
+    }
+  });
 
   res.json({ status: "OK" });
+});
+
+app.get("/events", (req, res) => {
+  res.json(EVENTS);
 });
 
 app.listen(5000, () => {
