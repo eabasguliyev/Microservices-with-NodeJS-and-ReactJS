@@ -7,7 +7,7 @@ const PostList = (props) => {
   const [posts, setPosts] = useState({});
 
   const fetchPosts = useCallback(async () => {
-    const response = await axios.get("http://localhost:4002/posts");
+    const response = await axios.get("http://posts.dev.com/posts");
 
     console.log(response.data);
     setPosts(response.data);
