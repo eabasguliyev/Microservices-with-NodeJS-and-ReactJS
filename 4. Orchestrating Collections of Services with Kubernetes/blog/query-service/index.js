@@ -70,13 +70,14 @@ app.get("/posts", (req, res) => {
 app.post("/events", (req, res) => {
   const { type, data } = req.body;
 
+  console.log("Received event:", type);
   handleEvent(type, data);
 
   res.json({});
 });
 
 app.listen(4002, async () => {
-  const response = await axios.get("http://localhost:5000/events");
+  const response = await axios.get("http://event-bus-srv:5000/events");
 
   const events = response.data;
 

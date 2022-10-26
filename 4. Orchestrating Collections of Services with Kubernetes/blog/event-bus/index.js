@@ -4,9 +4,9 @@ const axios = require("axios");
 
 const SERVICES = {
   post: "http://posts-clusterip-srv:4000/events",
-  // comment: "http://localhost:4001/events",
-  // query: "http://localhost:4002/events",
-  // moderation: "http://localhost:4003/events",
+  comment: "http://comments-clusterip-srv:4001/events",
+  query: "http://query-clusterip-srv:4002/events",
+  moderation: "http://moderation-clusterip-srv:4003/events",
 };
 
 const EVENTS = [];
