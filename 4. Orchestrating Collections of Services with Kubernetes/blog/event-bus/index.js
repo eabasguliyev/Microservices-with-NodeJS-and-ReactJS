@@ -18,6 +18,8 @@ app.use(bodyParser.json());
 app.post("/events", (req, res) => {
   const event = req.body;
 
+  console.log(`Received Event: ${event.type}`);
+
   EVENTS.push(event);
 
   Object.values(SERVICES).map(async (serviceUrl) => {
