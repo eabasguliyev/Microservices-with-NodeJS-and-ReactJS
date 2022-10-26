@@ -13,9 +13,9 @@ const CommentCreate = ({ postId }) => {
 
     await axios.post(
       `http://posts.dev.com/posts/${postId}/comments`,
-      JSON.stringify({
+      {
         content,
-      }),
+      },
       {
         headers: {
           "Content-Type": "application/json",

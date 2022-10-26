@@ -8,10 +8,8 @@ const PostCreate = () => {
     e.preventDefault();
 
     await axios.post(
-      "http://posts.dev.com/posts",
-      JSON.stringify({
-        title,
-      }),
+      "http://posts.dev.com/posts/create",
+      { title },
       {
         headers: {
           "Content-Type": "application/json",
