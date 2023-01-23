@@ -1,17 +1,18 @@
 import {
   NotAuthorizedError,
   NotFoundError,
+  OrderStatus,
   requireAuth,
   validateRequest,
 } from "@eabasguliyev-tickets/common";
 import { Router, Request, Response } from "express";
-import { Order } from "../models/order";
 import { param } from "express-validator";
 import mongoose from "mongoose";
+import { Order } from "../models/order";
 
 const router = Router();
 
-router.get(
+router.delete(
   "/:orderId",
   requireAuth,
   [
@@ -25,7 +26,7 @@ router.get(
   async (req: Request, res: Response) => {
     const { orderId } = req.params;
 
-    const existingOrder = await Order.findById(orderId).populate("ticket");
+    const existingOrder = await Order.findById(orderId);
 
     if (!existingOrder) {
       throw new NotFoundError();
@@ -35,8 +36,14 @@ router.get(
       throw new NotAuthorizedError();
     }
 
-    res.json(existingOrder);
+    existingOrder.status = OrderStatus.Cancelled;
+
+    await existingOrder.save();
+
+    // publishing an event saying this was cancelled
+
+    res.status(204).json(existingOrder);
   }
 );
 
-export { router as showOrderRouter };
+export { router as deleteOrderRouter };

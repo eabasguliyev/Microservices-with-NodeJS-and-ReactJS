@@ -23,6 +23,28 @@ spec:
                   key: JWT_KEY
             - name: MONGO_URI
               value: "mongodb://auth-mongo-srv:27017/auth"
+      initContainers:
+        - name: init-services
+          image: busybox
+          command:
+            [
+              "sh",
+              "-c",
+              "maxTry=10",
+              "counter=0",
+              "namespace=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace);",
+              "for serviceName in tickets-srv orders-srv;",
+              "do until nc -z $serviceName.$namespace.svc.cluster.local 3000;",
+              "if [ $counter -eq $maxTry ]",
+              "then break",
+              "fi",
+              "do echo waiting for $serviceName;",
+              "sleep 2;",
+              "++counter",
+              "done;",
+              "counter=0",
+              "done;",
+            ]
 ---
 apiVersion: v1
 kind: Service

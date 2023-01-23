@@ -1,30 +1,49 @@
 import request from "supertest";
 import { app } from "../../app";
-import mongoose from "mongoose";
+import { Ticket } from "../../models/ticket";
 
-it("returns a 404 if the ticket is not found", async () => {
-  const id = new mongoose.Types.ObjectId().toHexString();
+it("fetches the order", async () => {
+  // Create a ticket
+  const ticket = Ticket.build({ price: 20, title: "test" });
+  await ticket.save();
 
-  await request(app).get(`/api/tickets/${id}`).send().expect(404);
-});
-
-it("returns the ticket if the ticket is found", async () => {
+  // make a request to build an order with this ticket
   const cookie = await global.signup();
 
-  const ticketData = { title: "test", price: 20 };
-
-  const creationResponse = await request(app)
-    .post("/api/tickets")
+  const { body: createdOrder } = await request(app)
+    .post("/api/orders")
     .set("Cookie", cookie)
-    .send({ ...ticketData })
+    .send({ ticketId: ticket.id })
     .expect(201);
+  // make request to fetch the order
 
-  const getResponse = await request(app)
-    .get(`/api/tickets/${creationResponse.body.id}`)
+  const { body: fetchedOrder } = await request(app)
+    .get(`/api/orders/${createdOrder.data.id}`)
+    .set("Cookie", cookie)
     .send()
     .expect(200);
 
-  expect(creationResponse.body.id).toEqual(getResponse.body.id);
-  expect(creationResponse.body.title).toEqual(getResponse.body.title);
-  expect(creationResponse.body.price).toEqual(getResponse.body.price);
+  expect(fetchedOrder.id).toEqual(createdOrder.data.id);
+});
+
+it("returns an error if one user tries to fetch another users order", async () => {
+  // Create a ticket
+  const ticket = Ticket.build({ price: 20, title: "test" });
+  await ticket.save();
+
+  // make a request to build an order with this ticket
+  const cookie = await global.signup();
+
+  const { body: createdOrder } = await request(app)
+    .post("/api/orders")
+    .set("Cookie", cookie)
+    .send({ ticketId: ticket.id })
+    .expect(201);
+  // make request to fetch the order
+
+  const { body: fetchedOrder } = await request(app)
+    .get(`/api/orders/${createdOrder.data.id}`)
+    .set("Cookie", await global.signup())
+    .send()
+    .expect(401);
 });

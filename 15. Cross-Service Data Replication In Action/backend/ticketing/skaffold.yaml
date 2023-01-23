@@ -1,9 +1,10 @@
-apiVersion: skaffold/v2alpha3
+apiVersion: skaffold/v4beta1
 kind: Config
 deploy:
-  kubectl:
-    manifests:
-      - ./infra/k8s/*
+  kubectl: {}
+manifests:
+  rawYaml:
+    - ./infra/k8s/*
 build:
   local:
     push: false
@@ -18,6 +19,14 @@ build:
             dest: .
     - image: eabasguliyev/tickets
       context: tickets
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: "src/**/*.ts"
+            dest: .
+    - image: eabasguliyev/orders
+      context: orders
       docker:
         dockerfile: Dockerfile
       sync:
