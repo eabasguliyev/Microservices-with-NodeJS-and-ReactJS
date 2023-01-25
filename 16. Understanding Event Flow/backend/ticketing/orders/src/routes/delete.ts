@@ -9,6 +9,9 @@ import { Router, Request, Response } from "express";
 import { param } from "express-validator";
 import mongoose from "mongoose";
 import { Order } from "../models/order";
+import { natsWrapper } from "../nats-wrapper";
+import { OrderCreatedPublisher } from "../events/publishers/orderCreatedPublisher";
+import { OrderCancelledPublisher } from "../events/publishers/orderCancelledPublisher";
 
 const router = Router();
 
@@ -26,7 +29,7 @@ router.delete(
   async (req: Request, res: Response) => {
     const { orderId } = req.params;
 
-    const existingOrder = await Order.findById(orderId);
+    const existingOrder = await Order.findById(orderId).populate("ticket");
 
     if (!existingOrder) {
       throw new NotFoundError();
@@ -42,7 +45,14 @@ router.delete(
 
     // publishing an event saying this was cancelled
 
-    res.status(204).json(existingOrder);
+    new OrderCancelledPublisher(natsWrapper.client).publish({
+      id: existingOrder.id,
+      ticket: {
+        id: existingOrder.ticket.id,
+      },
+    });
+
+    res.status(204).json({ message: "Order cancelled", data: existingOrder });
   }
 );
 

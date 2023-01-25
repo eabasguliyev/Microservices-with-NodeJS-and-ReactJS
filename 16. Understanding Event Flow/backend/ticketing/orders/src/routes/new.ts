@@ -12,6 +12,8 @@ import {
 
 import { Ticket } from "../models/ticket";
 import { Order } from "../models/order";
+import { natsWrapper } from "../nats-wrapper";
+import { OrderCreatedPublisher } from "../events/publishers/orderCreatedPublisher";
 
 const router = Router();
 
@@ -53,16 +55,29 @@ router.post(
 
     // Build the order and save it to the database
 
-    const order = Order.build({
+    const existingOrder = Order.build({
       ticket: existingTicket,
       userId: req.currentUser!.id,
       status: OrderStatus.Created,
       expiresAt: expiration,
     });
 
-    await order.save();
+    await existingOrder.save();
+
     // Publish an event saying that an order was created
-    res.status(201).json({ message: "Order created", data: order });
+
+    new OrderCreatedPublisher(natsWrapper.client).publish({
+      id: existingOrder.id,
+      expiresAt: existingOrder.expiresAt.toISOString(),
+      status: existingOrder.status,
+      userId: req.currentUser!.id,
+      ticket: {
+        id: existingOrder.ticket.id,
+        price: existingOrder.ticket.price,
+      },
+    });
+
+    res.status(201).json({ message: "Order created", data: existingOrder });
   }
 );
 
