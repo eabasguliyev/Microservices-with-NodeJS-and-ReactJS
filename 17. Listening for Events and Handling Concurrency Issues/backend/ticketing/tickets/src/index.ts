@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
 import { app } from "./app";
 import { natsWrapper } from "./nats-wrapper";
-import { randomBytes } from "crypto";
+import { OrderCreatedListener } from "./events/listeners/orderCreatedListener";
+import { OrderCancelledListener } from "./events/listeners/orderCancelledListener";
 
 const start = async () => {
   if (!process.env.JWT_KEY) {
@@ -37,6 +38,9 @@ const start = async () => {
       console.log("NATS connection closed!");
       process.exit();
     });
+
+    new OrderCreatedListener(natsWrapper.client).listen();
+    new OrderCancelledListener(natsWrapper.client).listen();
 
     mongoose.set("strictQuery", false);
     await mongoose.connect(process.env.MONGO_URI);
