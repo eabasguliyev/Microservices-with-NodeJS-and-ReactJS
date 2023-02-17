@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: expiration-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: expiration
+  template:
+    metadata:
+      labels:
+        app: expiration
+    spec:
+      containers:
+      - name: expiration
+        image: eabasguliyev/expiration
+        env:
+        - name: NATS_URL
+          value: "http://nats-srv:4222"
+        - name: NATS_CLUSTER_ID
+          value: "ticketing"
+        - name: NATS_CLIENT_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: REDIS_HOST
+          value: expiration-redis-srv
+      initContainers:
+      - name: init-services
+        image: busybox
+        command: ["sh", "-c", "namespace=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace);", "serviceName=nats-srv", "until nc -z $serviceName.$namespace.svc.cluster.local 4222;", "do echo waiting for $serviceName;", "sleep 2;", "done;"]
