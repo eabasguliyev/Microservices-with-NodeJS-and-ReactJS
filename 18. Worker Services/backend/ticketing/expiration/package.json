@@ -22,7 +22,7 @@
     "ts-jest": "^29.0.5"
   },
   "dependencies": {
-    "@eabasguliyev-tickets/common": "^1.0.19",
+    "@eabasguliyev-tickets/common": "^1.0.21",
     "@types/bull": "^4.10.0",
     "@types/jest": "^29.2.5",
     "bull": "^4.10.4",
